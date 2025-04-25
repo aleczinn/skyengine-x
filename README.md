@@ -11,4 +11,3 @@ A voxel-engine based on the game minecraft but with my own ideas.
   - Frustum Culling
   - Occlusion Culling
   - Greedy Meshing
-
