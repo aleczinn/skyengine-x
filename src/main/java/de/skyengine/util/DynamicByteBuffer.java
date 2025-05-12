@@ -4,6 +4,7 @@ import de.skyengine.core.EngineConfig;
 import de.skyengine.core.SkyEngine;
 import de.skyengine.util.logging.LogManager;
 import de.skyengine.util.logging.Logger;
+import de.skyengine.util.math.MathUtils;
 import org.lwjgl.system.MemoryUtil;
 
 public class DynamicByteBuffer {
