@@ -157,7 +157,7 @@ public class SkyEngine {
                 this.input.init();
 
                 // Configure VAOs, Shader, Textures here
-                // TODO : Create FramebufferObject here
+                this.window.getFrameBuffer().create();
 
                 /* Make sure everything is ready before we show the window */
                 GL11.glFlush();

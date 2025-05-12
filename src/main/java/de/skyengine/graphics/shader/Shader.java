@@ -35,7 +35,7 @@ public class Shader implements IDisposable {
         GL20.glCompileShader(this.id);
 
         if (GL20.glGetShaderi(this.id, GL20.GL_COMPILE_STATUS) == GL20.GL_TRUE) {
-            this.logger.debug("Shader with type " + this.type.toString() + "_SHADER created.");
+            this.logger.debug("Shader with type " + this.type + "_SHADER created.");
         } else {
             this.logger.fatal("Shader cannot be compiled!\n" + GL20.glGetShaderInfoLog(this.id));
         }
@@ -47,6 +47,8 @@ public class Shader implements IDisposable {
 
     @Override
     public void dispose() {
+        this.logger.debug("delete shader with id " + this.id);
+
         GL20.glDeleteShader(this.id);
     }
 }

@@ -64,6 +64,8 @@ public class ShaderProgram implements IDisposable {
 
         this.fetchAttributes();
         this.fetchUniforms();
+
+        this.logger.debug("create shader programm with id " + this.programId);
     }
 
     protected void setDefaultUniforms() {}

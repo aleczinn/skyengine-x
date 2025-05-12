@@ -1,5 +1,7 @@
 package de.skyengine.core;
 
+import de.skyengine.graphics.framebuffer.FrameBuffer;
+import de.skyengine.util.DelayedRunnable;
 import de.skyengine.util.SpecsUtil;
 import de.skyengine.util.StringUtils;
 import de.skyengine.util.logging.LogManager;
@@ -29,12 +31,16 @@ public class Window {
 
     private GLCapabilities capabilities;
 
+    private final FrameBuffer frameBuffer;
+
     public Window(EngineConfig config) {
         this.config = config;
 
         this.initGLFW();
         this.initWindowHints();
         this.createWindow();
+
+        this.frameBuffer = new FrameBuffer(this.config);
     }
 
     public void init() {
@@ -44,6 +50,19 @@ public class Window {
         if (!(GLFW.glfwExtensionSupported("GL_EXT_framebuffer_object") || GLFW.glfwExtensionSupported("GL_ARB_framebuffer_object"))) {
             throw new RuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + GL11.glGetString(GL11.GL_VERSION) + ", FBO extension: false");
         }
+
+        GLFW.glfwSetFramebufferSizeCallback(this.windowID, (window, w, h) -> {
+            if (w <= 0 && h <= 0) return;
+
+            this.config.setWindowWidth(w);
+            this.config.setWindowHeight(h);
+
+            SkyEngine.get().getTasks().add(new DelayedRunnable(() -> {
+                this.frameBuffer.create();
+                GL11.glViewport(0, 0, this.config.getWindowWidth(), this.config.getWindowHeight());
+                return null;
+            }, "Framebuffer size change", 0));
+        });
 
         this.initDebugCallback();
         GLFW.glfwSetWindowIconifyCallback(this.windowID, (window, minimized) -> {
@@ -288,5 +307,9 @@ public class Window {
 
     public GLCapabilities getCapabilities() {
         return capabilities;
+    }
+
+    public FrameBuffer getFrameBuffer() {
+        return frameBuffer;
     }
 }
