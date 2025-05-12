@@ -1,6 +1,6 @@
 package de.skyengine.graphics.color;
 
-import de.skyengine.util.MathUtils;
+import de.skyengine.util.math.MathUtils;
 
 public class Color4 {
 

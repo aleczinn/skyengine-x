@@ -1,4 +1,4 @@
-package de.skyengine.util;
+package de.skyengine.util.math;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
