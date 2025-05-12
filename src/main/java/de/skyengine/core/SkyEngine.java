@@ -94,7 +94,7 @@ public class SkyEngine {
 
             this.drainRunnables();
 
-            // process input here?
+            this.input.update();
 
             int ticksProcessed = 0;
             while (accumulatedTime >= TICK_TIME_NANOS && ticksProcessed < 10) {
@@ -154,6 +154,7 @@ public class SkyEngine {
             this.tasks.add(new DelayedRunnable(() -> {
                 this.window.init();
                 this.window.printDebug();
+                this.input.init();
 
                 // Configure VAOs, Shader, Textures here
                 // TODO : Create FramebufferObject here
