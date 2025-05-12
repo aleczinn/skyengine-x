@@ -178,7 +178,7 @@ public class Input {
     }
 
     public void centerMouse() {
-        GLFW.glfwSetCursorPos(this.window.getWindowID(), SkyEngine.get().window().getWidth() / 2D, SkyEngine.get().window().getHeight() / 2D);
+        GLFW.glfwSetCursorPos(this.window.getWindowID(), SkyEngine.get().getWindow().getWidth() / 2D, SkyEngine.get().getWindow().getHeight() / 2D);
     }
 
     public String getClipboard() {

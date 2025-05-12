@@ -1,9 +1,9 @@
 package de.skyengine.graphics.framebuffer;
 
 import de.skyengine.core.EngineConfig;
+import de.skyengine.core.EngineProperties;
 import de.skyengine.core.SkyEngine;
 import de.skyengine.core.io.IDisposable;
-import de.skyengine.graphics.shader.Shader;
 import de.skyengine.util.logging.LogManager;
 import de.skyengine.util.logging.Logger;
 import org.lwjgl.opengl.GL30;
@@ -11,13 +11,13 @@ import org.lwjgl.opengl.NVFramebufferMultisampleCoverage;
 
 import static org.lwjgl.opengl.GL11C.GL_RGBA8;
 import static org.lwjgl.opengl.GL30C.*;
-import static org.lwjgl.opengl.NVFramebufferMultisampleCoverage.glRenderbufferStorageMultisampleCoverageNV;
 
 public class FrameBuffer implements IDisposable {
 
     private final Logger logger = LogManager.getLogger(FrameBuffer.class.getName());
 
     private final EngineConfig config;
+    private final EngineProperties properties;
 
     private int id;
 
@@ -30,16 +30,15 @@ public class FrameBuffer implements IDisposable {
     /** The number of color samples for a multisampled framebuffer, if is <code>true</code>. */
     private static final int COLOR_SAMPLES = 1;
 
-    public FrameBuffer(EngineConfig config) {
+    public FrameBuffer(EngineConfig config, EngineProperties properties) {
         this.config = config;
+        this.properties = properties;
     }
 
     public void create() {
         if (this.id != 0) {
             this.dispose();
         }
-
-        boolean useNvMultisampleCoverage = SkyEngine.get().window().getCapabilities().GL_NV_framebuffer_multisample_coverage;
 
         this.id = GL30.glGenFramebuffers();
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.id);
@@ -48,7 +47,7 @@ public class FrameBuffer implements IDisposable {
         this.colorRbo = GL30.glGenRenderbuffers();
         GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, this.colorRbo);
 
-        if (useNvMultisampleCoverage) {
+        if (this.properties.isUseNvMultisampleCoverage()) {
             NVFramebufferMultisampleCoverage.glRenderbufferStorageMultisampleCoverageNV(GL30.GL_RENDERBUFFER, COVERAGE_SAMPLES, COLOR_SAMPLES, GL30.GL_RGBA8, this.config.getWindowWidth(), this.config.getWindowHeight());
         } else {
             GL30.glRenderbufferStorageMultisample(GL_RENDERBUFFER, COVERAGE_SAMPLES, GL_RGBA8, this.config.getWindowWidth(), this.config.getWindowHeight());
@@ -58,7 +57,7 @@ public class FrameBuffer implements IDisposable {
         // Depth Buffer
         this.depthRbo = GL30.glGenRenderbuffers();
         GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, this.depthRbo);
-        if (useNvMultisampleCoverage) {
+        if (this.properties.isUseNvMultisampleCoverage()) {
             NVFramebufferMultisampleCoverage.glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, COVERAGE_SAMPLES, COLOR_SAMPLES, GL_DEPTH_COMPONENT32F, this.config.getWindowWidth(), this.config.getWindowHeight());
         } else {
             GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, COVERAGE_SAMPLES, GL30.GL_DEPTH_COMPONENT32F, this.config.getWindowWidth(), this.config.getWindowHeight());

@@ -49,7 +49,7 @@ public class LogManager {
 		StringBuilder builder = new StringBuilder();
 		
 		if(!logFile.exists()) {
-			if(!SkyEngine.get().files().createFile(logFile)) {
+			if(!SkyEngine.get().getFiles().createFile(logFile)) {
 				System.err.println("Die Log Datei konnte nicht erstellt werden!");
 			}
 		} else {
@@ -66,7 +66,7 @@ public class LogManager {
 					builder.append("\n");
 					
 					if(log.getThrowable() != null) {
-						builder.append(SkyEngine.get().files().getStackTrace(log.getThrowable()));
+						builder.append(SkyEngine.get().getFiles().getStackTrace(log.getThrowable()));
 						builder.append("\n");
 					}
 				} else {
@@ -84,7 +84,7 @@ public class LogManager {
 			e.printStackTrace();
 		}
 		
-		SkyEngine.get().files().zipFile(logFile);
+		SkyEngine.get().getFiles().zipFile(logFile);
 	}
 	
 	public void save() {
@@ -100,14 +100,14 @@ public class LogManager {
 		
 		File latestFile = new File(this.DIRECTORY + "latest.log");
 		if(!latestFile.exists()) {
-			SkyEngine.get().files().createFile(latestFile);
+			SkyEngine.get().getFiles().createFile(latestFile);
 		}
 		
-		String latestDate = dateFormat.format(SkyEngine.get().files().getLastModifiedTime(latestFile).toMillis());
+		String latestDate = dateFormat.format(SkyEngine.get().getFiles().getLastModifiedTime(latestFile).toMillis());
 		
 		boolean foundLatestZip = false;
 		for(File f : Objects.requireNonNull(logDir.listFiles())) {
-			String fileDate = dateFormat.format(SkyEngine.get().files().getLastModifiedTime(f).toMillis());
+			String fileDate = dateFormat.format(SkyEngine.get().getFiles().getLastModifiedTime(f).toMillis());
 			
 			if(!f.getName().equalsIgnoreCase(latestFile.getName()) && fileDate.equalsIgnoreCase(latestDate)) {
 				foundLatestZip = true;
@@ -144,7 +144,7 @@ public class LogManager {
 			File logZip = new File(this.DIRECTORY + logName + ".zip");
 			logZip.delete();
 		} else {
-			SkyEngine.get().files().clearFileContent(latestFile);
+			SkyEngine.get().getFiles().clearFileContent(latestFile);
 		}
 		
 		try {
@@ -153,7 +153,7 @@ public class LogManager {
 			writer.print(builder.toString());
 			writer.close();
 
-			SkyEngine.get().files().zipFile(latestFile, this.DIRECTORY + logName);
+			SkyEngine.get().getFiles().zipFile(latestFile, this.DIRECTORY + logName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

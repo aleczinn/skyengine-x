@@ -23,6 +23,7 @@ public class Window {
     private final Logger logger = LogManager.getLogger(Window.class.getName());
 
     private final EngineConfig config;
+    private final EngineProperties properties;
 
     private Long windowID = -1L;
 
@@ -35,17 +36,19 @@ public class Window {
 
     public Window(EngineConfig config) {
         this.config = config;
+        this.properties = new EngineProperties();
 
         this.initGLFW();
         this.initWindowHints();
         this.createWindow();
 
-        this.frameBuffer = new FrameBuffer(this.config);
+        this.frameBuffer = new FrameBuffer(this.config, this.properties);
     }
 
     public void init() {
         GLFW.glfwMakeContextCurrent(this.windowID);
         this.capabilities = GL.createCapabilities();
+        this.properties.update(this.capabilities);
 
         if (!(GLFW.glfwExtensionSupported("GL_EXT_framebuffer_object") || GLFW.glfwExtensionSupported("GL_ARB_framebuffer_object"))) {
             throw new RuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + GL11.glGetString(GL11.GL_VERSION) + ", FBO extension: false");
@@ -190,7 +193,7 @@ public class Window {
         if (this.config.getDebugMode().equals(EngineConfig.DebugMode.FULL)) {
             this.debugCallback = GLUtil.setupDebugMessageCallback();
 
-            if (this.capabilities.GL_ARB_debug_output || this.capabilities.OpenGL43) {
+            if (this.properties.isUseSynchronousDebugCallback()) {
                 GL11.glEnable(ARBDebugOutput.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
             }
         }
@@ -209,18 +212,17 @@ public class Window {
         System.out.println("Max Texture Size: " + GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE));
 
         System.out.println(StringUtils.padBoth("[ GLCapabilities ]", 70, '='));
-        this.logger.debug("UseDirectStateAccess: " + (this.capabilities.GL_ARB_direct_state_access/* 4.5 */ && this.capabilities.GL_ARB_vertex_attrib_binding/* 4.3 */ || this.capabilities.OpenGL45));
-        this.logger.debug("UseMultiDrawIndirect: " + (this.capabilities.GL_ARB_multi_draw_indirect || this.capabilities.OpenGL43));
-        this.logger.debug("UseBufferStorage: " + (this.capabilities.GL_ARB_buffer_storage || this.capabilities.OpenGL44));
-        this.logger.debug("UseClearBuffer: " + (this.capabilities.GL_ARB_clear_buffer_object || this.capabilities.OpenGL43));
-        this.logger.debug("UseInverseDepth: " + (this.capabilities.GL_ARB_clip_control || this.capabilities.OpenGL45));
-        this.logger.debug("UseNvMultisampleCoverage: " + (this.capabilities.GL_NV_framebuffer_multisample_coverage));
-        this.logger.debug("CanUseSynchronousDebugCallback: " + (this.capabilities.GL_ARB_debug_output || this.capabilities.OpenGL43));
-        boolean generateDrawCallsViaShader = this.capabilities.GL_ARB_shader_image_load_store/* 4.2 */ && this.capabilities.GL_ARB_shader_storage_buffer_object/* 4.3 */ && this.capabilities.GL_ARB_shader_atomic_counters/* 4.2 */ || this.capabilities.OpenGL43;
-        this.logger.debug("GenerateDrawCallsViaShader: " + generateDrawCallsViaShader);
-        this.logger.debug("UseOcclusionCulling: " + (generateDrawCallsViaShader && (this.capabilities.GL_ARB_buffer_storage || this.capabilities.OpenGL44)));
-        this.logger.debug("UseRepresentativeFragmentTest: " + this.capabilities.GL_NV_representative_fragment_test);
-        this.logger.debug("UniformBufferOffsetAlignment: " + GL11.glGetInteger(GL31.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT));
+        this.logger.debug("UseDirectStateAccess: " + this.properties.isUseDirectStateAccess());
+        this.logger.debug("UseMultiDrawIndirect: " + this.properties.isUseMultiDrawIndirect());
+        this.logger.debug("UseBufferStorage: " + this.properties.isUseBufferStorage());
+        this.logger.debug("UseClearBuffer: " + this.properties.isUseClearBuffer());
+        this.logger.debug("UseInverseDepth: " + this.properties.isUseInverseDepth());
+        this.logger.debug("UseNvMultisampleCoverage: " + this.properties.isUseNvMultisampleCoverage());
+        this.logger.debug("CanUseSynchronousDebugCallback: " + this.properties.isUseSynchronousDebugCallback());
+        this.logger.debug("GenerateDrawCallsViaShader: " + this.properties.isGenerateDrawCallsViaShader());
+        this.logger.debug("UseOcclusionCulling: " + this.properties.isUseOcclusionCulling());
+        this.logger.debug("UseRepresentativeFragmentTest: " + this.properties.isUseRepresentativeFragmentTest());
+        this.logger.debug("UniformBufferOffsetAlignment: " + this.properties.getUniformBufferOffsetAlignment());
     }
 
     public void destroy() {
@@ -307,6 +309,10 @@ public class Window {
 
     public GLCapabilities getCapabilities() {
         return capabilities;
+    }
+
+    public EngineProperties getProperties() {
+        return properties;
     }
 
     public FrameBuffer getFrameBuffer() {

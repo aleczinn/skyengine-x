@@ -240,15 +240,15 @@ public class SkyEngine {
         return config;
     }
 
-    public Window window() {
+    public Window getWindow() {
         return window;
     }
 
-    public Input input() {
+    public Input getInput() {
         return input;
     }
 
-    public Files files() {
+    public Files getFiles() {
         return files;
     }
 
