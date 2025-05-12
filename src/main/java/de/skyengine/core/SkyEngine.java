@@ -44,7 +44,7 @@ public class SkyEngine {
     }
 
     private void onUpdate() {
-
+        
     }
 
     private void render(float partialTick) {
