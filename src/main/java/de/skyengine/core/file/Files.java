@@ -113,14 +113,14 @@ public class Files {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[4069];
         int read = 0;
-        while((read = zipIn.read(bytesIn)) != -1) {
+        while ((read = zipIn.read(bytesIn)) != -1) {
             bos.write(bytesIn, 0, read);
         }
         bos.close();
     }
 
     public FileTime getLastModifiedTime(File file) {
-        if(!file.exists()) return null;
+        if (!file.exists()) return null;
         try {
             return java.nio.file.Files.getLastModifiedTime(file.toPath());
         } catch (IOException e) {
@@ -130,7 +130,7 @@ public class Files {
     }
 
     public void clearFileContent(File file) {
-        if(file.exists()) {
+        if (file.exists()) {
             try {
                 new FileWriter(file, false).close();
             } catch (IOException e) {

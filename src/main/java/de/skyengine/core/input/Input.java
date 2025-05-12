@@ -99,34 +99,46 @@ public class Input {
         }
     }
 
-    /** Returns whether the button is currently pressed */
+    /**
+     * Returns whether the button is currently pressed
+     */
     public boolean isMouseDown(int button) {
         InputState state = this.mouseStates.get(button);
         return state == InputState.PRESSED || state == InputState.DOWN;
     }
 
-    /** Returns whether the button <b>was</b> <i>pressed</i> */
+    /**
+     * Returns whether the button <b>was</b> <i>pressed</i>
+     */
     public boolean isMousePressed(int button) {
         return this.mouseStates.get(button) == InputState.PRESSED;
     }
 
-    /** Returns whether the button <b>was</b> <i>released</i> */
+    /**
+     * Returns whether the button <b>was</b> <i>released</i>
+     */
     public boolean isMouseReleased(int button) {
         return this.mouseStates.get(button) == InputState.RELEASED;
     }
 
-    /** Returns whether the key is currently pressed */
+    /**
+     * Returns whether the key is currently pressed
+     */
     public boolean isKeyDown(int key) {
         InputState state = this.keyStates.get(key);
         return state == InputState.PRESSED || state == InputState.DOWN;
     }
 
-    /** Returns whether the key <b>was</b> <i>pressed</i> */
+    /**
+     * Returns whether the key <b>was</b> <i>pressed</i>
+     */
     public boolean isKeyPressed(int key) {
         return this.keyStates.get(key) == InputState.PRESSED;
     }
 
-    /** Returns whether the key <b>was</b> <i>released</i> */
+    /**
+     * Returns whether the key <b>was</b> <i>released</i>
+     */
     public boolean isKeyReleased(int key) {
         return this.keyStates.get(key) == InputState.RELEASED;
     }
@@ -134,6 +146,7 @@ public class Input {
     /**
      * Calculates a value out of every connected controller and the keyboard input.
      * The default keys are WASD!
+     *
      * @return a value between -1 and 1 for the axis.
      */
     public double getAxis(InputAxis axis) {

@@ -44,7 +44,7 @@ public class SkyEngine {
     }
 
     private void onUpdate() {
-        
+
     }
 
     private void render(float partialTick) {
@@ -105,7 +105,7 @@ public class SkyEngine {
             }
 
             if (ticksProcessed >= 10) {
-                this.logger.warning("Can't keep up with TPS! Skip " + (accumulatedTime / TICK_TIME_NANOS)  + " Ticks.");
+                this.logger.warning("Can't keep up with TPS! Skip " + (accumulatedTime / TICK_TIME_NANOS) + " Ticks.");
                 accumulatedTime = 0;
             }
 
@@ -194,7 +194,9 @@ public class SkyEngine {
         }
     }
 
-    /** Loop in the main thread to only process OS/window event messages. */
+    /**
+     * Loop in the main thread to only process OS/window event messages.
+     */
     private void runWindowProcessLoop() {
         GLFW.glfwShowWindow(this.window.getWindowID());
 
@@ -227,7 +229,9 @@ public class SkyEngine {
         }
     }
 
-    /** This method closes the game */
+    /**
+     * This method closes the game
+     */
     public void shutdown() {
         this.window.forceClose();
     }
