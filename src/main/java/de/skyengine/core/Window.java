@@ -54,20 +54,22 @@ public class Window implements IDisposable {
             throw new RuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + GL11.glGetString(GL11.GL_VERSION) + ", FBO extension: false");
         }
 
-        GLFW.glfwSetFramebufferSizeCallback(this.windowID, (window, w, h) -> {
-            if (w <= 0 && h <= 0) return;
+        this.initDebugCallback();
 
-            this.config.setWindowWidth(w);
-            this.config.setWindowHeight(h);
+        GLFW.glfwSetFramebufferSizeCallback(this.windowID, (window, width, height) -> {
+            if (width <= 0 && height <= 0) return;
+
+            this.config.setWindowWidth(width);
+            this.config.setWindowHeight(height);
 
             SkyEngine.get().getTasks().add(new DelayedRunnable(() -> {
                 this.frameBuffer.create();
-                GL11.glViewport(0, 0, this.config.getWindowWidth(), this.config.getWindowHeight());
+                SkyEngine.get().onResize(width, height);
+                GL11.glViewport(0, 0, width, height);
                 return null;
             }, "Framebuffer size change", 0));
         });
 
-        this.initDebugCallback();
         GLFW.glfwSetWindowIconifyCallback(this.windowID, (window, minimized) -> {
             this.config.setMinimized(minimized);
         });

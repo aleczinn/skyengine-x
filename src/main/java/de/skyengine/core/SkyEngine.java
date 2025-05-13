@@ -2,12 +2,12 @@ package de.skyengine.core;
 
 import de.skyengine.core.file.Files;
 import de.skyengine.core.input.Input;
+import de.skyengine.game.GameContainer;
 import de.skyengine.util.DelayedRunnable;
 import de.skyengine.util.logging.LogManager;
 import de.skyengine.util.logging.Logger;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.*;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -18,6 +18,9 @@ public class SkyEngine {
 
     public static final String ENGINE_NAME = "SkyEngine";
     public static final String ENGINE_VERSION = "1.0.0";
+
+    /** The index/token used in an index buffer for primitive restart. */
+    public static final int PRIMITIVE_RESTART_INDEX = 0xFFFF;
 
     private static SkyEngine instance = null;
     private final Logger logger = LogManager.getLogger(SkyEngine.class.getName());
@@ -33,6 +36,8 @@ public class SkyEngine {
 
     private final Queue<DelayedRunnable> tasks;
 
+    private final GameContainer game;
+
     public SkyEngine(EngineConfig config) {
         instance = this;
 
@@ -41,13 +46,14 @@ public class SkyEngine {
         this.input = new Input(this.window);
         this.files = new Files();
         this.tasks = new ConcurrentLinkedQueue<>();
+        this.game = new GameContainer();
     }
 
     private void onUpdate() {
-
+        this.game.update(this.input);
     }
 
-    private void render(float partialTick) {
+    private void onRender(float partialTick) {
         GL11.glClearColor(
                 this.config.getWindowClearColor().red,
                 this.config.getWindowClearColor().green,
@@ -55,21 +61,31 @@ public class SkyEngine {
                 this.config.getWindowClearColor().alpha
         );
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthFunc(GL11.GL_LEQUAL);
-
-        GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_BACK);
-
-        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glEnable(GL31.GL_PRIMITIVE_RESTART);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL31.glPrimitiveRestartIndex(PRIMITIVE_RESTART_INDEX);
+
+        if (this.window.getProperties().isUseInverseDepth()) {
+            ARBClipControl.glClipControl(GL20.GL_LOWER_LEFT, ARBClipControl.GL_ZERO_TO_ONE);
+            GL11.glDepthFunc(GL11.GL_GREATER);
+            GL11.glClearDepth(0.0);
+        } else {
+            GL11.glDepthFunc(GL11.GL_LESS);
+        }
+
+        this.game.render(partialTick);
 
         GLFW.glfwSwapBuffers(this.window.getWindowID());
     }
 
+    public void onResize(int width, int height) {
+        this.game.resize(width, height);
+    }
+
     private void onExit() {
         this.logger.info("Stopping!");
+
+        this.game.dispose();
 
         this.drainRunnables();
         GL.setCapabilities(null);
@@ -112,7 +128,7 @@ public class SkyEngine {
             }
 
             float partialTick = (float) accumulatedTime / TICK_TIME_NANOS;
-            this.render(partialTick);
+            this.onRender(partialTick);
             frames++;
 
             // TODO: Add fps limit function here
@@ -260,6 +276,10 @@ public class SkyEngine {
 
     public Queue<DelayedRunnable> getTasks() {
         return tasks;
+    }
+
+    public GameContainer getGame() {
+        return game;
     }
 
     public static SkyEngine get() {

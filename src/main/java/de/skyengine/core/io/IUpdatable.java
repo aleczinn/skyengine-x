@@ -4,5 +4,5 @@ import de.skyengine.core.input.Input;
 
 public interface IUpdatable {
 
-    void update();
+    void update(Input input);
 }
