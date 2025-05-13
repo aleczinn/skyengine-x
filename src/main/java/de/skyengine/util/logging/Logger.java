@@ -86,7 +86,7 @@ public class Logger {
                 System.out.println("[" + time + "] " + "[" + threadName + "/" + ANSI.WHITE + level.toString() + ANSI.RESET + "] " + this.name + " " + method + " : " + message);
                 break;
             case DEBUG:
-                if (!SkyEngine.get().getConfig().getDebugMode().equals(EngineConfig.DebugMode.NONE)) {
+                if (SkyEngine.get().getConfig().getDebugMode().equals(EngineConfig.DebugMode.FULL)) {
                     System.out.println("[" + time + "] " + "[" + threadName + "/" + ANSI.CYAN + level.toString() + ANSI.RESET + "] " + this.name + " " + method + " : " + message);
                 }
                 break;

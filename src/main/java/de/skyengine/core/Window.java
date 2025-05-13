@@ -193,11 +193,9 @@ public class Window implements IDisposable {
     }
 
     private void initDebugCallback() {
-        if (this.config.getDebugMode().equals(EngineConfig.DebugMode.FULL)) {
+        if (!this.config.getDebugMode().equals(EngineConfig.DebugMode.NONE)) {
             GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
-        }
 
-        if (this.config.getDebugMode().equals(EngineConfig.DebugMode.FULL)) {
             this.debugCallback = GLUtil.setupDebugMessageCallback();
 
             if (this.properties.isUseSynchronousDebugCallback()) {
