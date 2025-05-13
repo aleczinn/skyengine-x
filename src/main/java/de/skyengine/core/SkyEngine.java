@@ -117,7 +117,7 @@ public class SkyEngine {
 
             // TODO: Add fps limit function here
             if (this.config.getBackgroundFPS() > TPS && this.config.isMinimized()) {
-                this.syncy(this.config.getBackgroundFPS(), lastLoopTime);
+                this.sync(this.config.getBackgroundFPS(), lastLoopTime);
             }
 
             // show states each 1 second
