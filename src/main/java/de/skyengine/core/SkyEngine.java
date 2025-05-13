@@ -144,7 +144,7 @@ public class SkyEngine {
             double remainingTime = nextFrameTime - GLFW.glfwGetTime();
             if (remainingTime > 0.002) { // Mehr als 2ms übrig -> sleep
                 try {
-                    Thread.sleep((long)(remainingTime * 900));
+                    Thread.sleep((long) (remainingTime * 900));
                 } catch (InterruptedException e) {
                     this.logger.error(null, e);
                 }
