@@ -2,14 +2,19 @@ package de.skyengine.core.input;
 
 import de.skyengine.core.SkyEngine;
 import de.skyengine.core.Window;
+import de.skyengine.core.input.controller.ControllerAxis;
+import de.skyengine.core.input.controller.ControllerButton;
+import de.skyengine.core.input.controller.GameController;
+import de.skyengine.core.io.IUpdatable;
 import de.skyengine.util.logging.LogManager;
 import de.skyengine.util.logging.Logger;
 import de.skyengine.util.math.MathUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
+import java.util.Map;
 
-public class Input {
+public class Input implements IUpdatable {
 
     private final Logger logger = LogManager.getLogger(Input.class.getName());
 
@@ -25,21 +30,33 @@ public class Input {
     private final HashMap<Integer, InputState> mouseStates;
     private final HashMap<Integer, InputState> keyStates;
 
+    private final Map<Integer, GameController> controller;
+
     public Input(Window window) {
         this.window = window;
 
         this.mouseStates = new HashMap<>();
         this.keyStates = new HashMap<>();
+        this.controller = new HashMap<>();
     }
 
     public void init() {
+        for (int i = GLFW.GLFW_JOYSTICK_1; i <= GLFW.GLFW_JOYSTICK_LAST; i++) {
+            if (GLFW.glfwJoystickPresent(i)) {
+                this.controller.put(i, new GameController(i));
+                this.logger.info("Controller connected. (" + i + ", " + this.controller.get(i).getName() + ")");
+            }
+        }
+
         GLFW.glfwSetCursorEnterCallback(this.window.getWindowID(), this::onCursorEnter);
         GLFW.glfwSetCursorPosCallback(this.window.getWindowID(), this::onCursorPos);
         GLFW.glfwSetScrollCallback(this.window.getWindowID(), this::onScroll);
         GLFW.glfwSetMouseButtonCallback(this.window.getWindowID(), this::onMouseButton);
         GLFW.glfwSetKeyCallback(this.window.getWindowID(), this::onKey);
+        GLFW.glfwSetJoystickCallback(this::onJoystick);
     }
 
+    @Override
     public void update() {
         this.deltaMouseX = this.mouseX - this.lastMouseX;
         this.deltaMouseY = this.mouseY - this.lastMouseY;
@@ -69,6 +86,11 @@ public class Input {
                 this.keyStates.put(key, InputState.NONE);
             }
         });
+
+        /* Update controller states */
+        for (GameController controller : this.controller.values()) {
+            controller.update();
+        }
     }
 
     private void onCursorEnter(long window, boolean entered) {
@@ -99,48 +121,87 @@ public class Input {
         }
     }
 
-    /**
-     * Returns whether the button is currently pressed
-     */
+    private void onJoystick(int joystickId, int event) {
+        if (event == GLFW.GLFW_CONNECTED) {
+            this.controller.put(joystickId, new GameController(joystickId));
+            this.logger.info("Controller connected. (" + joystickId + ", " + this.controller.get(joystickId).getName() + ")");
+        } else if (event == GLFW.GLFW_DISCONNECTED) {
+            this.logger.info("Controller disconnected. (" + joystickId + ", " + this.controller.get(joystickId).getName() + ")");
+            this.controller.remove(joystickId);
+        }
+    }
+
+    /** Returns whether the button is currently pressed */
     public boolean isMouseDown(int button) {
         InputState state = this.mouseStates.get(button);
         return state == InputState.PRESSED || state == InputState.DOWN;
     }
 
-    /**
-     * Returns whether the button <b>was</b> <i>pressed</i>
-     */
+    /** Returns whether the button <b>was</b> <i>pressed</i> */
     public boolean isMousePressed(int button) {
         return this.mouseStates.get(button) == InputState.PRESSED;
     }
 
-    /**
-     * Returns whether the button <b>was</b> <i>released</i>
-     */
+    /** Returns whether the button <b>was</b> <i>released</i> */
     public boolean isMouseReleased(int button) {
         return this.mouseStates.get(button) == InputState.RELEASED;
     }
 
-    /**
-     * Returns whether the key is currently pressed
-     */
+    /** Returns whether the key is currently pressed */
     public boolean isKeyDown(int key) {
         InputState state = this.keyStates.get(key);
         return state == InputState.PRESSED || state == InputState.DOWN;
     }
 
-    /**
-     * Returns whether the key <b>was</b> <i>pressed</i>
-     */
+    /** Returns whether the key <b>was</b> <i>pressed</i> */
     public boolean isKeyPressed(int key) {
         return this.keyStates.get(key) == InputState.PRESSED;
     }
 
-    /**
-     * Returns whether the key <b>was</b> <i>released</i>
-     */
+    /** Returns whether the key <b>was</b> <i>released</i> */
     public boolean isKeyReleased(int key) {
         return this.keyStates.get(key) == InputState.RELEASED;
+    }
+
+    /** Return the first connected controller or null if nothing is connected */
+    public GameController getFirstController() {
+        if (this.controller.isEmpty()) return null;
+        return this.controller.values().iterator().next();
+    }
+
+    /** Return a specific controller from id */
+    public GameController getController(int controllerId) {
+        return this.controller.get(controllerId);
+    }
+
+    /** Check if a controller is connected */
+    public boolean isControllerConnected() {
+        return !this.controller.isEmpty();
+    }
+
+
+    /** Returns whether the button is currently pressed */
+    public boolean isControllerButtonDown(ControllerButton button) {
+        // TODO
+        return false;
+    }
+
+    /** Returns whether the button <b>was</b> <i>pressed</i> */
+    public boolean isControllerButtonPressed(ControllerButton button) {
+        // TODO
+        return false;
+    }
+
+    /** Returns whether the button <b>was</b> <i>released</i> */
+    public boolean isControllerButtonReleased(ControllerButton button) {
+        // TODO
+        return false;
+    }
+
+    /** Return the axis value */
+    public float getControllerAxis(ControllerAxis axis) {
+        // TODO
+        return 0.0f;
     }
 
     /**
@@ -150,19 +211,30 @@ public class Input {
      * @return a value between -1 and 1 for the axis.
      */
     public double getAxis(InputAxis axis) {
+        double keyboardValue = 0.0;
+        double controllerValue = 0.0;
+
+        // Keyboard
         switch (axis) {
             case HORIZONTAL -> {
                 float left = this.isKeyDown(GLFW.GLFW_KEY_A) ? -1 : 0;
                 float right = this.isKeyDown(GLFW.GLFW_KEY_D) ? 1 : 0;
-                return MathUtils.clamp(left + right, -1, 1);
+                keyboardValue = MathUtils.clamp(left + right, -1, 1);
             }
             case VERTICAL -> {
                 float up = this.isKeyDown(GLFW.GLFW_KEY_W) ? -1 : 0;
-                float down = this.isKeyDown(GLFW.GLFW_KEY_D) ? 1 : 0;
-                return MathUtils.clamp(up + down, -1, 1);
+                float down = this.isKeyDown(GLFW.GLFW_KEY_S) ? 1 : 0;
+                keyboardValue = MathUtils.clamp(up + down, -1, 1);
             }
         }
-        return 0;
+
+        // Controller
+        switch (axis) {
+            case HORIZONTAL -> controllerValue = this.getControllerAxis(ControllerAxis.LEFT_X);
+            case VERTICAL -> controllerValue = this.getControllerAxis(ControllerAxis.LEFT_Y);
+        }
+
+        return Math.abs(keyboardValue) > Math.abs(controllerValue) ? keyboardValue : controllerValue;
     }
 
     public void showCursor() {

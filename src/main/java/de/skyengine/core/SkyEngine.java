@@ -105,7 +105,7 @@ public class SkyEngine {
             }
 
             if (ticksProcessed >= 10) {
-                this.logger.warning("Can't keep up with TPS! Skip " + (accumulatedTime / TICK_TIME_NANOS) + " Ticks.");
+                this.logger.warning("Can't keep up with TPS! Skipping " + (accumulatedTime / TICK_TIME_NANOS) + " Ticks.");
                 accumulatedTime = 0;
             }
 
