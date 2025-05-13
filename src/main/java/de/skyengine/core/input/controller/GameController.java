@@ -1,12 +1,13 @@
 package de.skyengine.core.input.controller;
 
+import de.skyengine.core.input.Input;
 import de.skyengine.core.io.IUpdatable;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-public class GameController implements IUpdatable {
+public class GameController {
 
     private final int id;
     private final String name;
@@ -27,7 +28,6 @@ public class GameController implements IUpdatable {
         this.update();
     }
 
-    @Override
     public void update() {
         // Handle axis
         this.axesBuffer = GLFW.glfwGetJoystickAxes(id);
