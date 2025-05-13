@@ -5,7 +5,6 @@ import de.skyengine.core.Window;
 import de.skyengine.core.input.controller.ControllerAxis;
 import de.skyengine.core.input.controller.ControllerButton;
 import de.skyengine.core.input.controller.GameController;
-import de.skyengine.core.io.IUpdatable;
 import de.skyengine.util.logging.LogManager;
 import de.skyengine.util.logging.Logger;
 import de.skyengine.util.math.MathUtils;
@@ -14,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Input implements IUpdatable {
+public class Input {
 
     private final Logger logger = LogManager.getLogger(Input.class.getName());
 
@@ -56,8 +55,7 @@ public class Input implements IUpdatable {
         GLFW.glfwSetJoystickCallback(this::onJoystick);
     }
 
-    @Override
-    public void update(Input input) {
+    public void update() {
         this.deltaMouseX = this.mouseX - this.lastMouseX;
         this.deltaMouseY = this.mouseY - this.lastMouseY;
 
