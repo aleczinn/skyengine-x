@@ -80,6 +80,7 @@ public class SkyEngine {
 
         long lastTickTime = System.nanoTime();
         long accumulatedTime = 0;
+        double lastLoopTime = 0;
 
         int frames = 0;
         int updates = 0;
@@ -89,6 +90,7 @@ public class SkyEngine {
             long currentTime = System.nanoTime();
             long frameTime = currentTime - lastTickTime;
             lastTickTime = currentTime;
+            lastLoopTime = GLFW.glfwGetTime();
 
             accumulatedTime += frameTime;
 
@@ -114,6 +116,9 @@ public class SkyEngine {
             frames++;
 
             // TODO: Add fps limit function here
+            if (this.config.getBackgroundFPS() > TPS && this.config.isMinimized()) {
+                this.syncy(this.config.getBackgroundFPS(), lastLoopTime);
+            }
 
             // show states each 1 second
             if (System.currentTimeMillis() - lastStatusTime >= 1000) {
@@ -131,20 +136,21 @@ public class SkyEngine {
         this.onExit();
     }
 
-    public void sync(int fps, double lastLoopTime) {
-        double now = GLFW.glfwGetTime();
+    public void sync(int fps, double currentLoopTime) {
         float targetTime = 1F / fps;
+        double nextFrameTime = currentLoopTime + targetTime;
 
-        while (now - lastLoopTime < targetTime) {
-            Thread.yield();
-
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                this.logger.error(null, e);
+        while (GLFW.glfwGetTime() < nextFrameTime) {
+            double remainingTime = nextFrameTime - GLFW.glfwGetTime();
+            if (remainingTime > 0.002) { // Mehr als 2ms übrig -> sleep
+                try {
+                    Thread.sleep((long)(remainingTime * 900));
+                } catch (InterruptedException e) {
+                    this.logger.error(null, e);
+                }
+            } else {
+                Thread.yield();
             }
-
-            now = GLFW.glfwGetTime();
         }
     }
 
