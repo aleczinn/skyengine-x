@@ -57,7 +57,7 @@ public class Input implements IUpdatable {
     }
 
     @Override
-    public void update() {
+    public void update(Input input) {
         this.deltaMouseX = this.mouseX - this.lastMouseX;
         this.deltaMouseY = this.mouseY - this.lastMouseY;
 
