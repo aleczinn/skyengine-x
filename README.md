@@ -6,6 +6,12 @@
 
 A voxel-engine based on the game minecraft but with my own ideas.
 
+### Features
+
+- Window System
+- Input Handling (controller support not fully implemented yet)
+- Helper Classes (FrameBuffer, ShaderProgram)
+
 ### Planned Features
 
 - Chunk management
