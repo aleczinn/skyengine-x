@@ -188,7 +188,7 @@ public class SkyEngine {
              */
             updateAndRenderThread.join();
 
-            this.window.destroy();
+            this.window.dispose();
         } catch (InterruptedException e) {
             this.logger.fatal(e);
         }

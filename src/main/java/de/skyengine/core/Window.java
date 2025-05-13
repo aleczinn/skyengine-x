@@ -1,5 +1,6 @@
 package de.skyengine.core;
 
+import de.skyengine.core.io.IDisposable;
 import de.skyengine.graphics.framebuffer.FrameBuffer;
 import de.skyengine.util.DelayedRunnable;
 import de.skyengine.util.SpecsUtil;
@@ -16,9 +17,8 @@ import org.lwjgl.system.MemoryUtil;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
 
-public class Window {
+public class Window implements IDisposable {
 
     private final Logger logger = LogManager.getLogger(Window.class.getName());
 
@@ -166,7 +166,10 @@ public class Window {
         for (String path : paths) {
             File file = new File(path);
 
-            if (!file.exists()) throw new RuntimeException("Icon: " + path + " could not be found!");
+            if (!file.exists()) {
+                this.logger.fatal(new RuntimeException("Icon: " + path + " could not be found!"));
+                return;
+            }
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer w = stack.mallocInt(1);
@@ -183,6 +186,10 @@ public class Window {
                 }
             }
         }
+
+        images.position(0);
+        GLFW.glfwSetWindowIcon(this.windowID, images);
+        images.free();
     }
 
     private void initDebugCallback() {
@@ -200,18 +207,18 @@ public class Window {
     }
 
     public void printDebug() {
-        System.out.println(StringUtils.padBoth("[ Engine ]", 70, '='));
-        System.out.println("Starting Engine");
-        System.out.println("Using LWJGL " + SpecsUtil.getLWJGLVersion());
-        System.out.println("OS: " + SpecsUtil.getOS());
-        System.out.println("OpenGL Vendor : " + GL11.glGetString(GL11.GL_VENDOR));
-        System.out.println("Driver Version: " + GL11.glGetString(GL11.GL_VERSION));
-        System.out.println("OpenGL Renderer : " + GL11.glGetString(GL11.GL_RENDERER));
-        System.out.println("GLSL Version: " + SpecsUtil.getGLSLVersion());
-        System.out.println("Java: " + SpecsUtil.getJava());
-        System.out.println("Max Texture Size: " + GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE));
+        this.logger.info(StringUtils.padBoth("[ Engine ]", 50, '='));
+        this.logger.info("Starting Engine");
+        this.logger.info("Using LWJGL " + SpecsUtil.getLWJGLVersion());
+        this.logger.info("OS: " + SpecsUtil.getOS());
+        this.logger.info("OpenGL Vendor : " + GL11.glGetString(GL11.GL_VENDOR));
+        this.logger.info("Driver Version: " + GL11.glGetString(GL11.GL_VERSION));
+        this.logger.info("OpenGL Renderer : " + GL11.glGetString(GL11.GL_RENDERER));
+        this.logger.info("GLSL Version: " + SpecsUtil.getGLSLVersion());
+        this.logger.info("Java: " + SpecsUtil.getJava());
+        this.logger.info("Max Texture Size: " + GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE));
 
-        System.out.println(StringUtils.padBoth("[ GLCapabilities ]", 70, '='));
+        this.logger.debug(StringUtils.padBoth("[ GLCapabilities ]", 50, '='));
         this.logger.debug("UseDirectStateAccess: " + this.properties.isUseDirectStateAccess());
         this.logger.debug("UseMultiDrawIndirect: " + this.properties.isUseMultiDrawIndirect());
         this.logger.debug("UseBufferStorage: " + this.properties.isUseBufferStorage());
@@ -225,7 +232,8 @@ public class Window {
         this.logger.debug("UniformBufferOffsetAlignment: " + this.properties.getUniformBufferOffsetAlignment());
     }
 
-    public void destroy() {
+    @Override
+    public void dispose() {
         if (this.debugCallback != null) {
             this.debugCallback.free();
             this.debugCallback = null;
@@ -266,24 +274,8 @@ public class Window {
         return this.config.getWindowWidth();
     }
 
-    public float getWidthf() {
-        return this.config.getWindowWidth();
-    }
-
-    public void setWidth(int width) {
-        this.config.setWindowWidth(width);
-    }
-
     public int getHeight() {
         return this.config.getWindowHeight();
-    }
-
-    public float getHeightf() {
-        return this.config.getWindowHeight();
-    }
-
-    public void setHeight(int height) {
-        this.config.setWindowHeight(height);
     }
 
     public double getAspectRatio() {
