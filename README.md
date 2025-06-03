@@ -26,3 +26,7 @@ A voxel-engine based on the game minecraft but with my own ideas.
     - Frustum Culling
     - Occlusion Culling
     - Greedy Meshing
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
